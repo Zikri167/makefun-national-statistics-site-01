@@ -86,17 +86,20 @@ export function hbarChart({ items, valueKey, labelKey, unit, color = '#0e7490', 
   items.forEach((d, i) => {
     const y = 6 + i * rowH;
     const w = Math.max(2, ((W - 190) * d[valueKey]) / max);
-    rows += `<text x="0" y="${y + 15}" font-size="12" fill="#334155">${esc(d[labelKey])}</text>` +
+    // Label panjang dipotong agar tidak tertutup batang; nama lengkap ada di tooltip.
+    const lab = d[labelKey].length > 27 ? d[labelKey].slice(0, 26) + '…' : d[labelKey];
+    rows += `<text x="0" y="${y + 15}" font-size="12" fill="#334155"><title>${esc(d[labelKey])}</title>${esc(lab)}</text>` +
       `<rect x="180" y="${y + 2}" width="${w}" height="18" rx="3" fill="${color}"/>` +
       `<text x="${186 + w}" y="${y + 16}" font-size="12" fill="#0f172a">${fmtNum(d[valueKey])}${unit ? ' ' + esc(unit) : ''}</text>`;
   });
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Grafik batang horizontal" class="chart-svg">${rows}</svg>`;
 }
 
-export function donutChart({ items, valueKey, labelKey, colors }) {
+export function donutChart({ items, valueKey, labelKey, colors, interactive = false, highlight = null }) {
   const size = 220, cx = 110, cy = 110, r = 82, inner = 52;
   const total = items.reduce((s, d) => s + d[valueKey], 0);
   let angle = -Math.PI / 2, paths = '', legend = '';
+  const hl = highlight !== null && highlight >= 0 && highlight < items.length ? highlight : null;
   items.forEach((d, i) => {
     const frac = d[valueKey] / total;
     const a0 = angle, a1 = angle + frac * Math.PI * 2;
@@ -106,12 +109,20 @@ export function donutChart({ items, valueKey, labelKey, colors }) {
     const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
     const xi1 = cx + inner * Math.cos(a1), yi1 = cy + inner * Math.sin(a1);
     const xi0 = cx + inner * Math.cos(a0), yi0 = cy + inner * Math.sin(a0);
-    paths += `<path d="M ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 ${large} 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L ${xi1.toFixed(1)} ${yi1.toFixed(1)} A ${inner} ${inner} 0 ${large} 0 ${xi0.toFixed(1)} ${yi0.toFixed(1)} Z" fill="${colors[i % colors.length]}"><title>${esc(d[labelKey])}: ${fmtNum(d[valueKey])}%</title></path>`;
+    const dim = hl !== null && hl !== i ? ' donut-dim' : '';
+    const click = interactive ? ` data-donut="${i}"` : '';
+    paths += `<path d="M ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 ${large} 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L ${xi1.toFixed(1)} ${yi1.toFixed(1)} A ${inner} ${inner} 0 ${large} 0 ${xi0.toFixed(1)} ${yi0.toFixed(1)} Z" fill="${colors[i % colors.length]}" class="donut-slice${dim}"${click}><title>${esc(d[labelKey])}: ${fmtNum(d[valueKey])}% — klik untuk menyorot</title></path>`;
+    const row = `<span class="swatch" style="background:${colors[i % colors.length]}"></span>${esc(d[labelKey])} — <strong>${fmtNum(d[valueKey])}%</strong>`;
+    legend += interactive
+      ? `<li><button type="button" class="legend-btn${hl === i ? ' active' : ''}" data-donut="${i}" aria-pressed="${hl === i}">${row}</button></li>`
+      : `<li>${row}</li>`;
   });
+  const centerMain = hl !== null ? fmtNum(items[hl][valueKey]) + '%' : fmtNum(total, 1) + '%';
+  const centerSub = hl !== null ? 'dari PDB' : 'total';
   return `<div class="donut-wrap"><svg viewBox="0 0 ${size} ${size}" role="img" aria-label="Diagram donat" class="donut-svg">${paths}` +
-    `<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">${fmtNum(total, 1)}%</text>` +
-    `<text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="11" fill="#64748b">total</text></svg>` +
-    `<ul class="legend">${items.map((d, i) => `<li><span class="swatch" style="background:${colors[i % colors.length]}"></span>${esc(d[labelKey])} — <strong>${fmtNum(d[valueKey])}%</strong></li>`).join('')}</ul></div>`;
+    `<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">${centerMain}</text>` +
+    `<text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="11" fill="#64748b">${esc(centerSub)}</text></svg>` +
+    `<ul class="legend">${legend}</ul></div>`;
 }
 
 // Garis tren mini untuk kartu KPI: seri 2015-2024 sebagai SVG kecil.
