@@ -19,7 +19,7 @@ mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
 ## Isi
 
-- `app/` — situs statis: `index.html`, `style.css`, `main.js` (routing hash), `data.js` (data Indonesia + 38 provinsi), `charts.js` (grafik SVG), `views.js` (halaman).
+- `app/` — situs statis: `index.html`, `style.css`, `main.js` (routing hash), `data.js` (data Indonesia + 38 provinsi, termasuk IPM dan piramida penduduk), `charts.js` (grafik SVG, sparkline, piramida penduduk), `map.js` (peta ubin 38 provinsi), `views.js` (halaman).
 - `screenshots/` — 4 render asli situs: beranda, ekonomi, provinsi (desktop 1280×800), dan beranda ukuran HP (390×844).
 - `shots.json` — daftar screenshot dan tampilan yang direkamnya.
 - `main.ts` — menyalin `app/` dan `screenshots/` ke output dan menulis `dossier.json` via `vendor/makefun-frontend.ts`.
