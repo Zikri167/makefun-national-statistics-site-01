@@ -11,10 +11,10 @@ const app = document.getElementById('app');
 const state = {
   home: { metric: 'population', chart: 'line', mapMetric: 'population' },
   population: { metric: 'population', chart: 'line', year: 2024, pyramidYear: 2024 },
-  economy: { metric: 'gdpGrowth', chart: 'line' },
+  economy: { metric: 'gdpGrowth', chart: 'line', donutHighlight: null },
   health: { metric: 'lifeExpectancy', chart: 'line' },
   education: { metric: 'literacy', chart: 'line' },
-  regions: { q: '', island: 'Semua', sort: 'population', dir: 'desc', mapMetric: 'population' },
+  regions: { q: '', island: 'Semua', sort: 'population', dir: 'desc', mapMetric: 'population', compareA: 'DKI Jakarta', compareB: 'Papua Pegunungan' },
 };
 
 const TITLES = {
@@ -78,6 +78,8 @@ app.addEventListener('change', (e) => {
   if (ctl === 'metric') s.metric = el.value;
   if (ctl === 'year') s.year = Number(el.value);
   if (ctl === 'island') s.island = el.value;
+  if (ctl === 'compareA') s.compareA = el.value;
+  if (ctl === 'compareB') s.compareB = el.value;
   if (ctl === 'pyramidYear') s.pyramidYear = Number(el.value);
   if (ctl === 'mapMetric') {
     state.home.mapMetric = el.value;
@@ -106,6 +108,27 @@ app.addEventListener('click', (e) => {
   if (clearBtn) {
     state.regions.q = '';
     render();
+    return;
+  }
+  const swapBtn = e.target.closest('[data-swap-compare]');
+  if (swapBtn) {
+    const s = state.regions;
+    const tmp = s.compareA;
+    s.compareA = s.compareB;
+    s.compareB = tmp;
+    render();
+    return;
+  }
+  const donutBtn = e.target.closest('[data-donut]');
+  if (donutBtn) {
+    const s = state.economy;
+    const idx = Number(donutBtn.dataset.donut);
+    // Klik yang sama lagi membatalkan sorotan.
+    s.donutHighlight = s.donutHighlight === idx ? null : idx;
+    render();
+    // Kembalikan fokus ke tombol legenda agar pengguna keyboard tidak kehilangan posisi.
+    const btn = document.querySelector(`.legend-btn[data-donut="${idx}"]`);
+    if (btn) btn.focus();
     return;
   }
   const tile = e.target.closest('[data-province]');
