@@ -114,6 +114,49 @@ export function donutChart({ items, valueKey, labelKey, colors }) {
     `<ul class="legend">${items.map((d, i) => `<li><span class="swatch" style="background:${colors[i % colors.length]}"></span>${esc(d[labelKey])} — <strong>${fmtNum(d[valueKey])}%</strong></li>`).join('')}</ul></div>`;
 }
 
+// Garis tren mini untuk kartu KPI: seri 2015-2024 sebagai SVG kecil.
+export function sparkline(values, color = '#0e7490') {
+  const W = 120, H = 34, P = 3;
+  const min = Math.min(...values), max = Math.max(...values);
+  const span = (max - min) || 1;
+  const x = (i) => P + (i * (W - 2 * P)) / (values.length - 1);
+  const y = (v) => P + ((max - v) * (H - 2 * P)) / span;
+  const pts = values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const last = values[values.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" class="spark" role="img" aria-label="Tren 2015–2024" preserveAspectRatio="none">` +
+    `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>` +
+    `<circle cx="${x(values.length - 1)}" cy="${y(last)}" r="3" fill="${color}"/></svg>`;
+}
+
+// Piramida penduduk: batang horizontal dua arah, laki-laki ke kiri,
+// perempuan ke kanan, per kelompok umur. Nilai dalam persen penduduk.
+export function pyramidChart({ groups, male, female, year }) {
+  const W = 640, labelW = 52, rowH = 21, PT = 30, PB = 8;
+  const H = PT + groups.length * rowH + PB;
+  const cx = W / 2;
+  const max = Math.max(...male, ...female);
+  const half = (W - labelW * 2) / 2 - 14;
+  const w = (v) => (v / max) * half;
+  const maleColor = '#0e7490', femaleColor = '#be185d';
+  // Celah tengah 46px memberi ruang label kelompok umur tanpa tertutup batang.
+  const GAP = 23;
+  let rows = '';
+  groups.forEach((g, i) => {
+    const y = PT + i * rowH;
+    const mw = w(male[i]), fw = w(female[i]);
+    rows += `<rect x="${(cx - GAP - mw).toFixed(1)}" y="${y + 2}" width="${mw.toFixed(1)}" height="15" rx="2" fill="${maleColor}"><title>${esc(g)} laki-laki: ${fmtNum(male[i])}%</title></rect>` +
+      `<rect x="${cx + GAP}" y="${y + 2}" width="${fw.toFixed(1)}" height="15" rx="2" fill="${femaleColor}"><title>${esc(g)} perempuan: ${fmtNum(female[i])}%</title></rect>` +
+      `<text x="${cx}" y="${y + 14}" text-anchor="middle" font-size="11" fill="#0f172a" font-weight="600">${esc(g)}</text>` +
+      `<text x="${(cx - GAP - 4 - mw).toFixed(1)}" y="${y + 14}" text-anchor="end" font-size="10.5" fill="#334155">${fmtNum(male[i])}%</text>` +
+      `<text x="${(cx + GAP + 4 + fw).toFixed(1)}" y="${y + 14}" font-size="10.5" fill="#334155">${fmtNum(female[i])}%</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Piramida penduduk ${year}" class="chart-svg">` +
+    `<text x="${cx - GAP}" y="14" text-anchor="end" font-size="12" font-weight="700" fill="${maleColor}">◀ Laki-laki</text>` +
+    `<text x="${cx + GAP}" y="14" font-size="12" font-weight="700" fill="${femaleColor}">Perempuan ▶</text>` +
+    `<line x1="${cx}" y1="${PT - 6}" x2="${cx}" y2="${H - PB}" stroke="#cbd5e1" stroke-width="1"/>` +
+    rows + `</svg>`;
+}
+
 function fmtTick(v) {
   const a = Math.abs(v);
   if (a >= 1000) return v.toLocaleString('id-ID', { maximumFractionDigits: 0 });
