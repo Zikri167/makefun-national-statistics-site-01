@@ -228,6 +228,26 @@ input[type="search"] { min-width: 220px; }
 .donut-svg { width: 200px; flex: none; }
 .legend { list-style: none; margin: 0; padding: 0; }
 .legend li { margin-bottom: 6px; font-size: 0.95rem; }
+.legend-btn {
+  font: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 3px 7px;
+  margin: -3px -7px;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--ink);
+  width: 100%;
+}
+.legend-btn:hover { background: #f1f5f9; }
+.legend-btn.active { background: var(--accent-soft); font-weight: 700; box-shadow: inset 0 0 0 1px var(--teal); }
+.donut-slice { cursor: pointer; transition: opacity 0.15s ease; }
+.donut-slice:hover { opacity: 0.82; }
+.donut-dim { opacity: 0.18; }
+.donut-dim:hover { opacity: 0.3; }
+.compare-table th .cmp-island { font-weight: 400; color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+.compare-table { min-width: 520px; }
 .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 7px; }
 
 /* Tabel */
