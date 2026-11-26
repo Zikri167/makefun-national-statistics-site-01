@@ -50,6 +50,13 @@ export const SERIES = {
     values: [6.18, 5.61, 5.50, 5.34, 5.28, 7.07, 6.49, 5.86, 5.45, 4.82],
     note: 'Survei Angkatan Kerja Nasional (Sakernas), Februari/Agustus tiap tahun.',
   },
+  laborForce: {
+    label: 'Tingkat Partisipasi Angkatan Kerja',
+    unit: '%',
+    source: 'BPS 2024',
+    values: [65.76, 66.34, 66.65, 67.26, 67.49, 67.77, 67.80, 68.63, 69.48, 70.02],
+    note: 'Persentase penduduk usia kerja yang bekerja atau mencari kerja; Sakernas, Agustus tiap tahun.',
+  },
   poverty: {
     label: 'Tingkat Kemiskinan',
     unit: '% penduduk',
@@ -115,6 +122,21 @@ export const SECTORS = [
   { name: 'Informasi & komunikasi', share: 4.1 },
   { name: 'Jasa keuangan & asuransi', share: 4.0 },
   { name: 'Sektor lainnya', share: 22.9 },
+];
+
+// Lapangan kerja menurut sektor 2024 (persen penduduk bekerja) —
+// BPS, Sakernas Agustus 2024, dibulatkan; jumlah 100%.
+// Total penduduk bekerja Agustus 2024: 144,64 juta orang (BPS Sakernas 2024).
+export const EMPLOYED_TOTAL_2024 = '144,64 juta';
+export const EMPLOYMENT_SECTORS = [
+  { name: 'Pertanian, kehutanan, perikanan', share: 27.0 },
+  { name: 'Perdagangan besar & eceran', share: 18.8 },
+  { name: 'Jasa kemasyarakatan & pemerintahan', share: 15.9 },
+  { name: 'Industri pengolahan', share: 14.0 },
+  { name: 'Konstruksi', share: 6.5 },
+  { name: 'Transportasi & pergudangan', share: 5.6 },
+  { name: 'Akomodasi & makan minum', share: 5.4 },
+  { name: 'Sektor lainnya', share: 6.8 },
 ];
 
 // Mitra dagang utama 2024 (pangsa ekspor, persen) — BPS 2024.
