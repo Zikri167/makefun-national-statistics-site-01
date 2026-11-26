@@ -2,10 +2,11 @@
 // dan digambar ulang oleh main.js saat hash berubah atau kontrol diubah.
 
 import {
-  YEARS, SERIES, AGE_STRUCTURE, SECTORS, TRADE_PARTNERS,
+  YEARS, SERIES, AGE_STRUCTURE, PYRAMID, PYRAMID_GROUPS, SECTORS, TRADE_PARTNERS,
   PROVINCES, KPI_2024, COUNTRY_FACTS, fmt, fmtInt,
 } from './data.js';
-import { lineChart, barChart, hbarChart, donutChart } from './charts.js';
+import { lineChart, barChart, hbarChart, donutChart, sparkline, pyramidChart } from './charts.js';
+import { provinceMap, MAP_METRICS } from './map.js';
 
 const DONUT_COLORS = ['#0e7490', '#059669', '#d97706', '#dc2626', '#7c3aed', '#2563eb', '#0891b2', '#65a30d', '#ea580c'];
 
@@ -13,11 +14,35 @@ function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 }
 
+const KPI_COLORS = { population: '#0e7490', gdpGrowth: '#059669', inflation: '#d97706', unemployment: '#dc2626', poverty: '#7c3aed', lifeExpectancy: '#2563eb', literacy: '#0891b2', hdi: '#65a30d' };
+
 function kpiCards() {
   return `<section class="kpi-grid" aria-label="Indikator utama 2024">` +
-    KPI_2024.map((k) => `<article class="kpi"><div class="kpi-value">${k.value}</div>` +
-      `<div class="kpi-label">${k.label}</div><div class="kpi-src">${k.source}</div></article>`).join('') +
+    KPI_2024.map((k) => {
+      const s = SERIES[k.key];
+      const first = s.values[0], last = s.values[s.values.length - 1];
+      const chg = (((last - first) / Math.abs(first)) * 100).toFixed(1).replace('.', ',');
+      const up = last >= first;
+      const good = ['unemployment', 'poverty', 'inflation'].includes(k.key) ? !up : up;
+      return `<article class="kpi"><div class="kpi-top"><div><div class="kpi-value">${k.value}</div>` +
+      `<div class="kpi-label">${k.label}</div></div>${sparkline(s.values, KPI_COLORS[k.key] || '#0e7490')}</div>` +
+      `<div class="kpi-trend ${good ? 'good' : 'bad'}">${up ? '▲' : '▼'} ${chg.replace('-', '')}% sejak 2015</div>` +
+      `<div class="kpi-src">${k.source}</div></article>`;
+    }).join('') +
     `</section>`;
+}
+
+export function mapSection(metric, selectId) {
+  const opts = Object.entries(MAP_METRICS).map(([k, m]) => `<option value="${k}"${k === metric ? ' selected' : ''}>${m.label}</option>`).join('');
+  return `<section class="card map-card">
+    <h2>Peta Provinsi</h2>
+    <p class="card-sub">38 provinsi dalam peta ubin — tiap ubin satu provinsi, diwarnai menurut indikator yang dipilih. Klik ubin untuk menyaring tabel provinsi.</p>
+    <div class="controls">
+      <label>Warnai menurut <select id="${selectId}" data-control="mapMetric">${opts}</select></label>
+    </div>
+    ${provinceMap(metric)}
+    <p class="source">Sumber: ${esc(MAP_METRICS[metric].source)}; IPM memakai data 2023. Bentuk grid mengikuti letak kepulauan, bukan skala geografis sebenarnya.</p>
+  </section>`;
 }
 
 function sourceLine(series) {
@@ -49,11 +74,21 @@ export function home(state) {
   const delta = latest - prev;
   const deltaTxt = (delta >= 0 ? '+' : '') + fmt(delta) + ' ' + s.unit + ' vs 2023';
   return `<section class="hero">
+    <p class="hero-kicker">Data resmi 2015–2024 &nbsp;•&nbsp; 38 provinsi &nbsp;•&nbsp; 8 indikator utama</p>
     <h1>Indonesia dalam Angka</h1>
     <p class="lede">Statistik nasional Indonesia 2015–2024: penduduk, ekonomi, kesehatan,
     pendidikan, dan 38 provinsi — semua angka bersumber dan bisa dijelajahi.</p>
+    <nav class="quick-nav" aria-label="Jelajahi cepat">
+      <a href="#/population">👥 Penduduk</a>
+      <a href="#/economy">📈 Ekonomi</a>
+      <a href="#/health">❤️ Kesehatan</a>
+      <a href="#/education">🎓 Pendidikan</a>
+      <a href="#/regions">🗺️ 38 Provinsi</a>
+    </nav>
+    <p class="hero-facts"><strong>281,6 juta</strong> penduduk &nbsp;•&nbsp; <strong>5,03%</strong> pertumbuhan PDB &nbsp;•&nbsp; <strong>9,03%</strong> kemiskinan, terendah sepanjang sejarah &nbsp;•&nbsp; <strong>IPM 75,02</strong></p>
   </section>
   ${kpiCards()}
+  ${mapSection(state.mapMetric || 'population', 'home-map-metric')}
   <section class="card">
     <h2>Tren Nasional</h2>
     ${chartControls('home', ['population', 'gdpGrowth', 'inflation', 'unemployment', 'poverty', 'lifeExpectancy', 'hdi'], key, state.chart || 'line')}
@@ -87,6 +122,11 @@ export function populationPage(state) {
   const popPrev = idx > 0 ? SERIES.population.values[idx - 1] : null;
   const growth = popPrev !== null ? (((popVal - popPrev) / popPrev) * 100) : 0;
   const yearOpts = YEARS.map((y) => `<option value="${y}"${y === yr ? ' selected' : ''}>${y}</option>`).join('');
+  const pyrYear = state.pyramidYear || 2024;
+  const pyr = PYRAMID[pyrYear];
+  const pyrOpts = Object.keys(PYRAMID).map((y) => `<option value="${y}"${Number(y) === pyrYear ? ' selected' : ''}>${y}</option>`).join('');
+  const maleTotal = pyr.male.reduce((a, b) => a + b, 0);
+  const femaleTotal = pyr.female.reduce((a, b) => a + b, 0);
   return `<h1>Penduduk</h1>
   <p class="lede">Indonesia adalah negara terpadat keempat di dunia. Pertumbuhan penduduk melambat
   dari sekitar 1,5% per tahun pada 2015 menjadi sekitar 1,0% pada 2024.</p>
@@ -105,6 +145,16 @@ export function populationPage(state) {
     <article class="card"><h2>Struktur umur 2024</h2>
       ${donutChart({ items: AGE_STRUCTURE.map((a) => ({ label: a.group, value: a.share })), valueKey: 'value', labelKey: 'label', colors: DONUT_COLORS })}
       <p class="source">Sumber: BPS 2024. Bonus demografi: 68,7% penduduk berusia produktif.</p></article>
+  </section>
+  <section class="card">
+    <h2>Piramida Penduduk</h2>
+    <p class="card-sub">Bentuk piramida yang melebar di usia muda menunjukkan bonus demografi: penduduk usia produktif jauh lebih banyak daripada anak dan lansia.</p>
+    <div class="controls">
+      <label>Tahun piramida <select id="pyramid-year" data-control="pyramidYear">${pyrOpts}</select></label>
+      <span class="pyr-totals">Laki-laki <strong>${fmt(maleTotal, 1)}%</strong> &nbsp;•&nbsp; Perempuan <strong>${fmt(femaleTotal, 1)}%</strong></span>
+    </div>
+    ${pyramidChart({ groups: PYRAMID_GROUPS, male: pyr.male, female: pyr.female, year: pyrYear })}
+    <p class="source">Sumber: ${esc(pyr.source)}. Persen penduduk per kelompok umur; dibulatkan sehingga jumlahnya 100%.</p>
   </section>`;
 }
 
@@ -224,10 +274,12 @@ export function regionsPage(state) {
   <p class="lede">38 provinsi Indonesia — sekitar 282 juta jiwa penduduk (estimasi 2024;
   jumlah angka provinsi yang dibulatkan dapat sedikit berbeda dari total nasional 281,6 juta jiwa).
   Cari nama provinsi, saring per kepulauan, dan klik judul kolom untuk mengurutkan.</p>
+  ${mapSection(state.mapMetric || 'population', 'regions-map-metric')}
   <section class="card">
     <div class="controls">
       <label>Cari provinsi <input id="region-search" type="search" data-control="search" value="${esc(state.q || '')}" placeholder="mis. Jawa Barat"></label>
       <label>Kepulauan <select id="region-island" data-control="island">${islandOpts}</select></label>
+      ${state.q ? `<button type="button" class="btn btn-ghost" data-clear-filter>Hapus filter ✕</button>` : ''}
     </div>
     <p class="result-count">${rows.length} dari 38 provinsi ditampilkan.</p>
     <div class="table-wrap"><table>
@@ -238,6 +290,7 @@ export function regionsPage(state) {
         ${th('area', 'Luas (km²)')}
         ${th('density', 'Kepadatan (jiwa/km²)')}
         ${th('poverty', 'Kemiskinan (%)')}
+        ${th('hdi', 'IPM 2023')}
         ${th('gdpPc', 'PDB/kapita (Rp jt)')}
       </tr></thead>
       <tbody>${rows.map((p) => `<tr>
@@ -247,8 +300,9 @@ export function regionsPage(state) {
         <td class="num">${fmtInt(p.area)}</td>
         <td class="num">${fmtInt(Math.round((p.population * 1000) / p.area))}</td>
         <td class="num">${fmt(p.poverty)}</td>
+        <td class="num">${fmt(p.hdi)}</td>
         <td class="num">${fmt(p.gdpPc, 1)}</td>
-      </tr>`).join('') || '<tr><td colspan="7">Tidak ada provinsi yang cocok. Coba kata kunci lain.</td></tr>'}</tbody>
+      </tr>`).join('') || '<tr><td colspan="8">Tidak ada provinsi yang cocok. Coba kata kunci lain.</td></tr>'}</tbody>
     </table></div>
     <p class="source">Sumber: BPS 2024 (penduduk estimasi pertengahan tahun; kemiskinan Maret 2024) dan BPS 2023 (PDB per kapita). Kepadatan dihitung dari penduduk dibagi luas. Angka dibulatkan — lihat Tentang.</p>
   </section>`;
