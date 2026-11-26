@@ -2,7 +2,7 @@
 // dan digambar ulang oleh main.js saat hash berubah atau kontrol diubah.
 
 import {
-  YEARS, SERIES, AGE_STRUCTURE, PYRAMID, PYRAMID_GROUPS, SECTORS, TRADE_PARTNERS,
+  YEARS, SERIES, AGE_STRUCTURE, PYRAMID, PYRAMID_GROUPS, SECTORS, EMPLOYMENT_SECTORS, EMPLOYED_TOTAL_2024, TRADE_PARTNERS,
   PROVINCES, KPI_2024, COUNTRY_FACTS, fmt, fmtInt,
 } from './data.js';
 import { lineChart, barChart, hbarChart, donutChart, sparkline, pyramidChart } from './charts.js';
@@ -74,7 +74,7 @@ export function home(state) {
   const delta = latest - prev;
   const deltaTxt = (delta >= 0 ? '+' : '') + fmt(delta) + ' ' + s.unit + ' vs 2023';
   return `<section class="hero">
-    <p class="hero-kicker">Data resmi 2015–2024 &nbsp;•&nbsp; 38 provinsi &nbsp;•&nbsp; 8 indikator utama</p>
+    <p class="hero-kicker">Data resmi 2015–2024 &nbsp;•&nbsp; 38 provinsi &nbsp;•&nbsp; 9 indikator utama</p>
     <h1>Indonesia dalam Angka</h1>
     <p class="lede">Statistik nasional Indonesia 2015–2024: penduduk, ekonomi, kesehatan,
     pendidikan, dan 38 provinsi — semua angka bersumber dan bisa dijelajahi.</p>
@@ -91,7 +91,7 @@ export function home(state) {
   ${mapSection(state.mapMetric || 'population', 'home-map-metric')}
   <section class="card">
     <h2>Tren Nasional</h2>
-    ${chartControls('home', ['population', 'gdpGrowth', 'inflation', 'unemployment', 'poverty', 'lifeExpectancy', 'hdi'], key, state.chart || 'line')}
+    ${chartControls('home', ['population', 'gdpGrowth', 'inflation', 'unemployment', 'laborForce', 'poverty', 'lifeExpectancy', 'hdi'], key, state.chart || 'line')}
     <p class="big-number">${fmt(latest)} <span>${esc(s.unit)}</span></p>
     <p class="delta">${esc(s.label)} 2024 — ${deltaTxt}</p>
     ${chart}
@@ -164,29 +164,55 @@ export function economyPage(state) {
   const chart = state.chart === 'bar'
     ? barChart({ years: YEARS, values: s.values, label: s.label, unit: s.unit })
     : lineChart({ years: YEARS, values: s.values, label: s.label, unit: s.unit });
+  const hl = typeof state.donutHighlight === 'number' ? state.donutHighlight : null;
   return `<h1>Ekonomi</h1>
   <p class="lede">PDB Indonesia 2024 mencapai Rp22.139 triliun. Ekonomi tumbuh stabil di atas 5%
   selama tiga tahun berturut-turut, dengan inflasi yang terjaga rendah.</p>
   <section class="card">
     <h2>Tren ekonomi, 2015–2024</h2>
-    ${chartControls('econ', ['gdpGrowth', 'gdpPerCapita', 'inflation', 'unemployment', 'poverty'], key, state.chart || 'line')}
+    ${chartControls('econ', ['gdpGrowth', 'gdpPerCapita', 'inflation', 'unemployment', 'laborForce', 'poverty'], key, state.chart || 'line')}
     ${chart}
     ${sourceLine(s)}
   </section>
   <section class="card-grid">
-    <article class="card"><h2>Sektor penyumbang PDB 2024</h2>
-      ${hbarChart({ items: SECTORS, valueKey: 'share', labelKey: 'name', unit: '%' })}
-      <p class="source">Sumber: BPS 2024, pangsa PDB harga berlaku.</p></article>
-    <article class="card"><h2>Tujuan ekspor utama 2024</h2>
-      ${hbarChart({ items: TRADE_PARTNERS, valueKey: 'share', labelKey: 'country', unit: '%', color: '#059669' })}
-      <p class="source">Sumber: BPS 2024, pangsa nilai ekspor nonmigas dan migas.</p>
+    <article class="card"><h2>Komposisi PDB menurut lapangan usaha, 2024</h2>
+      <p class="card-sub">Klik irisan atau nama sektor di legenda untuk menyorotnya; klik lagi untuk membatalkan.</p>
+      ${donutChart({ items: SECTORS, valueKey: 'share', labelKey: 'name', colors: DONUT_COLORS, interactive: true, highlight: hl })}
+      <p class="source">Sumber: BPS 2024, pangsa PDB harga berlaku. Industri pengolahan tetap penyumbang terbesar, 18,9%.</p></article>
+    <article class="card"><h2>Lapangan kerja menurut sektor, 2024</h2>
+      ${hbarChart({ items: EMPLOYMENT_SECTORS, valueKey: 'share', labelKey: 'name', unit: '%', color: '#059669' })}
+      <p class="source">Sumber: BPS, Sakernas Agustus 2024; persen dari ${EMPLOYED_TOTAL_2024} penduduk bekerja, dibulatkan. Pertanian masih menyerap pekerja terbanyak (27,0%), meski pangsanya di PDB hanya 12,5%.</p>
       <h3 style="margin-top:1.2rem">Fakta cepat</h3>
       <ul class="facts">
         <li><strong>Rp22.139 triliun</strong> — PDB harga berlaku 2024 (BPS).</li>
         <li><strong>US$4.960</strong> — PDB per kapita 2024 (BPS &amp; Bank Indonesia).</li>
+        <li><strong>70,02%</strong> — tingkat partisipasi angkatan kerja, Agustus 2024 (BPS Sakernas).</li>
         <li><strong>2,61% → 1,57%</strong> — inflasi turun dari 2023 ke 2024 (BPS).</li>
         <li><strong>4,82%</strong> — pengangguran terendah sejak 2015 (BPS, Agustus 2024).</li>
       </ul></article>
+  </section>
+  <section class="card">
+    <h2>Tabel: komposisi PDB menurut lapangan usaha, 2024</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Peringkat</th><th>Lapangan usaha</th><th style="text-align:right">Pangsa PDB (%)</th></tr></thead>
+      <tbody>${[...SECTORS].sort((a, b) => b.share - a.share).map((d, i) => `<tr>
+        <td class="num">${i + 1}</td>
+        <td><strong>${esc(d.name)}</strong></td>
+        <td class="num">${fmt(d.share, 1)}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+    <p class="source">Sumber: BPS 2024, pangsa PDB atas dasar harga berlaku; angka dibulatkan, jumlah 100%.</p>
+  </section>
+  <section class="card-grid">
+    <article class="card"><h2>Tujuan ekspor utama 2024</h2>
+      ${hbarChart({ items: TRADE_PARTNERS, valueKey: 'share', labelKey: 'country', unit: '%', color: '#059669' })}
+      <p class="source">Sumber: BPS 2024, pangsa nilai ekspor nonmigas dan migas.</p></article>
+    <article class="card"><h2>Pertanian vs industri: dua wajah ekonomi</h2>
+      <p>Pertanian menyumbang 12,5% PDB tapi menyerap 27,0% pekerja — produktivitas per pekerjanya
+      jauh di bawah industri pengolahan, yang menyumbang 18,9% PDB dengan 14,0% pekerja.
+      Pergeseran pekerja dari pertanian ke industri dan jasa inilah yang mendorong kenaikan
+      PDB per kapita dari US$3.346 (2015) menjadi US$4.960 (2024).</p>
+      <p class="source">Sumber: BPS 2024; BPS Sakernas Agustus 2024.</p></article>
   </section>`;
 }
 
@@ -251,6 +277,47 @@ export function educationPage(state) {
   </section>`;
 }
 
+function compareSection(state) {
+  const aName = state.compareA || 'DKI Jakarta';
+  const bName = state.compareB || 'Papua Pegunungan';
+  const a = PROVINCES.find((p) => p.name === aName) || PROVINCES[0];
+  const b = PROVINCES.find((p) => p.name === bName) || PROVINCES[1];
+  const opts = (sel) => PROVINCES.map((p) => `<option value="${esc(p.name)}"${p.name === sel ? ' selected' : ''}>${esc(p.name)}</option>`).join('');
+  const density = (p) => Math.round((p.population * 1000) / p.area);
+  const rows = [
+    { label: 'Penduduk (ribu jiwa)', va: a.population, vb: b.population, f: (v) => fmtInt(v) },
+    { label: 'Kepadatan (jiwa/km²)', va: density(a), vb: density(b), f: (v) => fmtInt(v) },
+    { label: 'Luas (km²)', va: a.area, vb: b.area, f: (v) => fmtInt(v) },
+    { label: 'Kemiskinan (%)', va: a.poverty, vb: b.poverty, f: (v) => fmt(v) },
+    { label: 'IPM 2023', va: a.hdi, vb: b.hdi, f: (v) => fmt(v) },
+    { label: 'PDB per kapita (Rp juta)', va: a.gdpPc, vb: b.gdpPc, f: (v) => fmt(v, 1) },
+  ];
+  const diffTxt = (r) => {
+    const d = r.vb - r.va;
+    const sign = d > 0 ? '+' : d < 0 ? '−' : '';
+    return sign + r.f(Math.abs(d));
+  };
+  return `<section class="card">
+    <h2>Bandingkan dua provinsi</h2>
+    <p class="card-sub">Pilih dua provinsi untuk melihat perbandingannya berdampingan. Selisih dihitung dari provinsi B dikurangi provinsi A.</p>
+    <div class="controls">
+      <label>Provinsi A <select id="compare-a" data-control="compareA">${opts(a.name)}</select></label>
+      <label>Provinsi B <select id="compare-b" data-control="compareB">${opts(b.name)}</select></label>
+      <button type="button" class="btn btn-ghost" data-swap-compare>⇄ Tukar A ↔ B</button>
+    </div>
+    <div class="table-wrap"><table class="compare-table">
+      <thead><tr><th>Indikator</th><th>${esc(a.name)} <span class="cmp-island">(${esc(a.island)})</span></th><th>${esc(b.name)} <span class="cmp-island">(${esc(b.island)})</span></th><th>Selisih (B − A)</th></tr></thead>
+      <tbody>${rows.map((r) => `<tr>
+        <td>${r.label}</td>
+        <td class="num"><strong>${r.f(r.va)}</strong></td>
+        <td class="num"><strong>${r.f(r.vb)}</strong></td>
+        <td class="num">${diffTxt(r)}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+    <p class="source">Sumber: BPS 2024 (penduduk estimasi pertengahan tahun; kemiskinan Maret 2024) dan BPS 2023 (IPM dan PDB per kapita). Kepadatan dihitung dari penduduk dibagi luas.</p>
+  </section>`;
+}
+
 export function regionsPage(state) {
   const q = (state.q || '').toLowerCase();
   const island = state.island || 'Semua';
@@ -275,6 +342,7 @@ export function regionsPage(state) {
   jumlah angka provinsi yang dibulatkan dapat sedikit berbeda dari total nasional 281,6 juta jiwa).
   Cari nama provinsi, saring per kepulauan, dan klik judul kolom untuk mengurutkan.</p>
   ${mapSection(state.mapMetric || 'population', 'regions-map-metric')}
+  ${compareSection(state)}
   <section class="card">
     <div class="controls">
       <label>Cari provinsi <input id="region-search" type="search" data-control="search" value="${esc(state.q || '')}" placeholder="mis. Jawa Barat"></label>
