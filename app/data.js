@@ -87,6 +87,23 @@ export const AGE_STRUCTURE = [
   { group: '65+ tahun', share: 6.8, note: 'Lansia' },
 ];
 
+// Piramida penduduk: persen penduduk per kelompok umur 5 tahunan,
+// laki-laki dan perempuan. 2020 dari Sensus Penduduk 2020, 2024 dari
+// proyeksi penduduk BPS 2024. Persen dibulatkan; jumlah tiap tahun 100%.
+export const PYRAMID_GROUPS = ['0–4', '5–9', '10–14', '15–19', '20–24', '25–29', '30–34', '35–39', '40–44', '45–49', '50–54', '55–59', '60–64', '65–69', '70–74', '75+'];
+export const PYRAMID = {
+  2020: {
+    male: [4.6, 4.6, 4.5, 4.4, 4.3, 4.2, 4.1, 3.9, 3.6, 3.2, 2.7, 2.2, 1.7, 1.2, 0.8, 0.7],
+    female: [4.4, 4.4, 4.3, 4.2, 4.1, 4.0, 3.9, 3.8, 3.5, 3.1, 2.7, 2.3, 1.8, 1.3, 0.9, 0.6],
+    source: 'BPS, Sensus Penduduk 2020',
+  },
+  2024: {
+    male: [4.1, 4.2, 4.3, 4.4, 4.3, 4.2, 4.1, 4.0, 3.7, 3.3, 2.8, 2.3, 1.8, 1.3, 0.9, 0.8],
+    female: [3.9, 4.0, 4.1, 4.2, 4.1, 4.0, 3.9, 3.8, 3.6, 3.2, 2.8, 2.4, 1.9, 1.4, 1.0, 1.2],
+    source: 'BPS, Proyeksi Penduduk 2024',
+  },
+};
+
 // Kontribusi sektor terhadap PDB 2024 (persen) — BPS 2024.
 export const SECTORS = [
   { name: 'Industri pengolahan', share: 18.9 },
@@ -112,46 +129,47 @@ export const TRADE_PARTNERS = [
 
 // 38 provinsi. population dalam ribu jiwa (estimasi pertengahan 2024, BPS),
 // area dalam km2, poverty persen (Maret 2024, BPS), gdpPc dalam juta rupiah
-// per kapita (2023, BPS). Angka dibulatkan; lihat halaman Tentang.
+// per kapita (2023, BPS), hdi skor IPM 2023 (BPS). Angka dibulatkan;
+// lihat halaman Tentang.
 export const PROVINCES = [
-  { name: 'Aceh', island: 'Sumatera', population: 5532, area: 57957, poverty: 14.23, gdpPc: 48.2 },
-  { name: 'Sumatera Utara', island: 'Sumatera', population: 15663, area: 72981, poverty: 8.15, gdpPc: 62.5 },
-  { name: 'Sumatera Barat', island: 'Sumatera', population: 5906, area: 42013, poverty: 5.97, gdpPc: 56.8 },
-  { name: 'Riau', island: 'Sumatera', population: 6912, area: 87024, poverty: 6.67, gdpPc: 132.4 },
-  { name: 'Jambi', island: 'Sumatera', population: 3711, area: 50058, poverty: 7.58, gdpPc: 68.9 },
-  { name: 'Sumatera Selatan', island: 'Sumatera', population: 9024, area: 91592, poverty: 11.78, gdpPc: 69.3 },
-  { name: 'Bengkulu', island: 'Sumatera', population: 2109, area: 19935, poverty: 14.43, gdpPc: 45.1 },
-  { name: 'Lampung', island: 'Sumatera', population: 9277, area: 34624, poverty: 11.62, gdpPc: 48.7 },
-  { name: 'Kepulauan Bangka Belitung', island: 'Sumatera', population: 1524, area: 16424, poverty: 4.42, gdpPc: 72.4 },
-  { name: 'Kepulauan Riau', island: 'Sumatera', population: 2222, area: 8202, poverty: 5.37, gdpPc: 158.6 },
-  { name: 'DKI Jakarta', island: 'Jawa', population: 10702, area: 664, poverty: 4.34, gdpPc: 298.5 },
-  { name: 'Jawa Barat', island: 'Jawa', population: 49936, area: 35378, poverty: 7.46, gdpPc: 61.2 },
-  { name: 'Jawa Tengah', island: 'Jawa', population: 37993, area: 32801, poverty: 10.47, gdpPc: 52.3 },
-  { name: 'DI Yogyakarta', island: 'Jawa', population: 3822, area: 3134, poverty: 10.83, gdpPc: 55.9 },
-  { name: 'Jawa Timur', island: 'Jawa', population: 41814, area: 47799, poverty: 10.35, gdpPc: 74.8 },
-  { name: 'Banten', island: 'Jawa', population: 12364, area: 9663, poverty: 5.84, gdpPc: 79.6 },
-  { name: 'Bali', island: 'Bali & Nusa Tenggara', population: 4410, area: 5780, poverty: 4.25, gdpPc: 71.5 },
-  { name: 'Nusa Tenggara Barat', island: 'Bali & Nusa Tenggara', population: 5660, area: 18572, poverty: 12.11, gdpPc: 38.4 },
-  { name: 'Nusa Tenggara Timur', island: 'Bali & Nusa Tenggara', population: 5724, area: 48718, poverty: 19.96, gdpPc: 27.9 },
-  { name: 'Kalimantan Barat', island: 'Kalimantan', population: 5804, area: 147307, poverty: 6.74, gdpPc: 55.3 },
-  { name: 'Kalimantan Tengah', island: 'Kalimantan', population: 2879, area: 153565, poverty: 5.11, gdpPc: 74.2 },
-  { name: 'Kalimantan Selatan', island: 'Kalimantan', population: 4319, area: 38744, poverty: 4.29, gdpPc: 71.8 },
-  { name: 'Kalimantan Timur', island: 'Kalimantan', population: 4024, area: 127347, poverty: 6.11, gdpPc: 211.7 },
-  { name: 'Kalimantan Utara', island: 'Kalimantan', population: 757, area: 75467, poverty: 6.64, gdpPc: 168.9 },
-  { name: 'Sulawesi Utara', island: 'Sulawesi', population: 2743, area: 13892, poverty: 7.09, gdpPc: 62.1 },
-  { name: 'Sulawesi Tengah', island: 'Sulawesi', population: 3147, area: 61841, poverty: 11.72, gdpPc: 78.5 },
-  { name: 'Sulawesi Selatan', island: 'Sulawesi', population: 9541, area: 46717, poverty: 8.06, gdpPc: 68.4 },
-  { name: 'Sulawesi Tenggara', island: 'Sulawesi', population: 2838, area: 38068, poverty: 11.04, gdpPc: 66.7 },
-  { name: 'Gorontalo', island: 'Sulawesi', population: 1231, area: 11257, poverty: 15.15, gdpPc: 41.3 },
-  { name: 'Sulawesi Barat', island: 'Sulawesi', population: 1610, area: 16788, poverty: 11.27, gdpPc: 43.6 },
-  { name: 'Maluku', island: 'Maluku & Papua', population: 1983, area: 46914, poverty: 16.42, gdpPc: 34.8 },
-  { name: 'Maluku Utara', island: 'Maluku & Papua', population: 1406, area: 31983, poverty: 6.28, gdpPc: 78.9 },
-  { name: 'Papua', island: 'Maluku & Papua', population: 1131, area: 82406, poverty: 21.49, gdpPc: 68.2 },
-  { name: 'Papua Pegunungan', island: 'Maluku & Papua', population: 1492, area: 51311, poverty: 34.79, gdpPc: 19.4 },
-  { name: 'Papua Selatan', island: 'Maluku & Papua', population: 580, area: 118811, poverty: 18.25, gdpPc: 41.7 },
-  { name: 'Papua Tengah', island: 'Maluku & Papua', population: 1352, area: 61446, poverty: 29.69, gdpPc: 88.3 },
-  { name: 'Papua Barat', island: 'Maluku & Papua', population: 573, area: 64029, poverty: 20.03, gdpPc: 72.6 },
-  { name: 'Papua Barat Daya', island: 'Maluku & Papua', population: 618, area: 38308, poverty: 17.35, gdpPc: 118.4 },
+  { name: 'Aceh', island: 'Sumatera', population: 5532, area: 57957, poverty: 14.23, gdpPc: 48.2, hdi: 72.07 },
+  { name: 'Sumatera Utara', island: 'Sumatera', population: 15663, area: 72981, poverty: 8.15, gdpPc: 62.5, hdi: 72.71 },
+  { name: 'Sumatera Barat', island: 'Sumatera', population: 5906, area: 42013, poverty: 5.97, gdpPc: 56.8, hdi: 73.75 },
+  { name: 'Riau', island: 'Sumatera', population: 6912, area: 87024, poverty: 6.67, gdpPc: 132.4, hdi: 74.95 },
+  { name: 'Jambi', island: 'Sumatera', population: 3711, area: 50058, poverty: 7.58, gdpPc: 68.9, hdi: 72.47 },
+  { name: 'Sumatera Selatan', island: 'Sumatera', population: 9024, area: 91592, poverty: 11.78, gdpPc: 69.3, hdi: 70.89 },
+  { name: 'Bengkulu', island: 'Sumatera', population: 2109, area: 19935, poverty: 14.43, gdpPc: 45.1, hdi: 71.23 },
+  { name: 'Lampung', island: 'Sumatera', population: 9277, area: 34624, poverty: 11.62, gdpPc: 48.7, hdi: 70.27 },
+  { name: 'Kepulauan Bangka Belitung', island: 'Sumatera', population: 1524, area: 16424, poverty: 4.42, gdpPc: 72.4, hdi: 71.68 },
+  { name: 'Kepulauan Riau', island: 'Sumatera', population: 2222, area: 8202, poverty: 5.37, gdpPc: 158.6, hdi: 77.57 },
+  { name: 'DKI Jakarta', island: 'Jawa', population: 10702, area: 664, poverty: 4.34, gdpPc: 298.5, hdi: 82.46 },
+  { name: 'Jawa Barat', island: 'Jawa', population: 49936, area: 35378, poverty: 7.46, gdpPc: 61.2, hdi: 73.74 },
+  { name: 'Jawa Tengah', island: 'Jawa', population: 37993, area: 32801, poverty: 10.47, gdpPc: 52.3, hdi: 72.70 },
+  { name: 'DI Yogyakarta', island: 'Jawa', population: 3822, area: 3134, poverty: 10.83, gdpPc: 55.9, hdi: 80.51 },
+  { name: 'Jawa Timur', island: 'Jawa', population: 41814, area: 47799, poverty: 10.35, gdpPc: 74.8, hdi: 73.92 },
+  { name: 'Banten', island: 'Jawa', population: 12364, area: 9663, poverty: 5.84, gdpPc: 79.6, hdi: 74.85 },
+  { name: 'Bali', island: 'Bali & Nusa Tenggara', population: 4410, area: 5780, poverty: 4.25, gdpPc: 71.5, hdi: 76.55 },
+  { name: 'Nusa Tenggara Barat', island: 'Bali & Nusa Tenggara', population: 5660, area: 18572, poverty: 12.11, gdpPc: 38.4, hdi: 68.57 },
+  { name: 'Nusa Tenggara Timur', island: 'Bali & Nusa Tenggara', population: 5724, area: 48718, poverty: 19.96, gdpPc: 27.9, hdi: 68.17 },
+  { name: 'Kalimantan Barat', island: 'Kalimantan', population: 5804, area: 147307, poverty: 6.74, gdpPc: 55.3, hdi: 69.10 },
+  { name: 'Kalimantan Tengah', island: 'Kalimantan', population: 2879, area: 153565, poverty: 5.11, gdpPc: 74.2, hdi: 71.60 },
+  { name: 'Kalimantan Selatan', island: 'Kalimantan', population: 4319, area: 38744, poverty: 4.29, gdpPc: 71.8, hdi: 71.64 },
+  { name: 'Kalimantan Timur', island: 'Kalimantan', population: 4024, area: 127347, poverty: 6.11, gdpPc: 211.7, hdi: 77.97 },
+  { name: 'Kalimantan Utara', island: 'Kalimantan', population: 757, area: 75467, poverty: 6.64, gdpPc: 168.9, hdi: 72.94 },
+  { name: 'Sulawesi Utara', island: 'Sulawesi', population: 2743, area: 13892, poverty: 7.09, gdpPc: 62.1, hdi: 73.33 },
+  { name: 'Sulawesi Tengah', island: 'Sulawesi', population: 3147, area: 61841, poverty: 11.72, gdpPc: 78.5, hdi: 70.52 },
+  { name: 'Sulawesi Selatan', island: 'Sulawesi', population: 9541, area: 46717, poverty: 8.06, gdpPc: 68.4, hdi: 73.14 },
+  { name: 'Sulawesi Tenggara', island: 'Sulawesi', population: 2838, area: 38068, poverty: 11.04, gdpPc: 66.7, hdi: 71.65 },
+  { name: 'Gorontalo', island: 'Sulawesi', population: 1231, area: 11257, poverty: 15.15, gdpPc: 41.3, hdi: 69.17 },
+  { name: 'Sulawesi Barat', island: 'Sulawesi', population: 1610, area: 16788, poverty: 11.27, gdpPc: 43.6, hdi: 66.52 },
+  { name: 'Maluku', island: 'Maluku & Papua', population: 1983, area: 46914, poverty: 16.42, gdpPc: 34.8, hdi: 69.73 },
+  { name: 'Maluku Utara', island: 'Maluku & Papua', population: 1406, area: 31983, poverty: 6.28, gdpPc: 78.9, hdi: 69.98 },
+  { name: 'Papua', island: 'Maluku & Papua', population: 1131, area: 82406, poverty: 21.49, gdpPc: 68.2, hdi: 61.94 },
+  { name: 'Papua Pegunungan', island: 'Maluku & Papua', population: 1492, area: 51311, poverty: 34.79, gdpPc: 19.4, hdi: 59.71 },
+  { name: 'Papua Selatan', island: 'Maluku & Papua', population: 580, area: 118811, poverty: 18.25, gdpPc: 41.7, hdi: 66.48 },
+  { name: 'Papua Tengah', island: 'Maluku & Papua', population: 1352, area: 61446, poverty: 29.69, gdpPc: 88.3, hdi: 63.85 },
+  { name: 'Papua Barat', island: 'Maluku & Papua', population: 573, area: 64029, poverty: 20.03, gdpPc: 72.6, hdi: 70.09 },
+  { name: 'Papua Barat Daya', island: 'Maluku & Papua', population: 618, area: 38308, poverty: 17.35, gdpPc: 118.4, hdi: 68.90 },
 ];
 
 export const KPI_2024 = [
